@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Product Factory Class
  *
@@ -26,7 +31,7 @@ class WC_Product_Factory {
 			return false;
 		}
 
-		$classname = $this->get_product_class( $the_product );
+		$classname = $this->get_product_class( $the_product, $args );
 
 		if ( ! class_exists( $classname ) ) {
 			$classname = 'WC_Product_Simple';
@@ -47,9 +52,10 @@ class WC_Product_Factory {
 	/**
 	 * Get the product class name
 	 * @param  WP_Post $the_product
+	 * @param  array $args (default: array())
 	 * @return string
 	 */
-	private function get_product_class( $the_product ) {
+	private function get_product_class( $the_product, $args = array() ) {
 		$product_id = absint( $the_product->ID );
 		$post_type  = $the_product->post_type;
 
@@ -75,7 +81,7 @@ class WC_Product_Factory {
 	/**
 	 * Get the product object
 	 * @param  mixed $the_product
-	 * @uses   WP_POST
+	 * @uses   WP_Post
 	 * @return WP_Post|bool false on failure
 	 */
 	private function get_product_object( $the_product ) {
@@ -89,6 +95,6 @@ class WC_Product_Factory {
 			$the_product = false;
 		}
 
-		return $the_product;
+		return apply_filters( 'woocommerce_product_object', $the_product );
 	}
 }

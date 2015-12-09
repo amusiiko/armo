@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_Refund {
 			$request['CURRENCYCODE'] = $order->get_order_currency();
 			$request['REFUNDTYPE']   = 'Partial';
 		}
-		return $request;
+		return apply_filters( 'woocommerce_paypal_refund_request', $request, $order, $amount, $reason );
 	}
 
 	/**
@@ -53,17 +53,18 @@ class WC_Gateway_Paypal_Refund {
 	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
 	 */
 	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
 			array(
 				'method'      => 'POST',
 				'body'        => self::get_request( $order, $amount, $reason ),
 				'timeout'     => 70,
-				'sslverify'   => false,
 				'user-agent'  => 'WooCommerce',
 				'httpversion' => '1.1'
 			)
 		);
+
+		WC_Gateway_Paypal::log( 'Refund Response: ' . print_r( $response, true ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
